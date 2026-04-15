@@ -2,7 +2,7 @@ import axios from 'axios';
 import { message } from 'antd';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api.foi-app.com/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,7 +11,7 @@ const apiClient = axios.create({
 // Request Interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,15 +24,25 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const errorMessage = error.response?.data?.message || 'Something went wrong';
-    message.error(errorMessage);
+    let errorMessage = 'Something went wrong';
+    const detail = error.response?.data?.detail;
     
-    if (error.response?.status === 401) {
-      // Handle logout
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    if (typeof detail === 'string') {
+      errorMessage = detail;
+    } else if (Array.isArray(detail) && detail.length > 0) {
+      errorMessage = detail[0].msg || 'Validation error';
+    } else {
+      errorMessage = error.response?.data?.message || 'Something went wrong';
     }
     
+    message.error(errorMessage);
+
+    if (error.response?.status === 401) {
+      // Handle logout
+      localStorage.removeItem('access_token');
+      window.location.href = '/login';
+    }
+
     return Promise.reject(error);
   }
 );

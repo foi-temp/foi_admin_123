@@ -2,6 +2,8 @@ import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import { AdminLayout } from './components/layout/AdminLayout';
+import { AuthLayout } from './components/layout/AuthLayout';
+import { ProtectedRoute } from './routes/ProtectedRoute';
 
 // Pages
 import { DashboardPage } from './pages/dashboard/DashboardPage';
@@ -15,6 +17,10 @@ import { UsersPage } from './pages/users/UsersPage';
 import { ReportsPage } from './pages/reports/ReportsPage';
 import { AnalyticsPage } from './pages/analytics/AnalyticsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
+
+// Auth Pages
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
 
 const App: React.FC = () => {
   return (
@@ -43,20 +49,30 @@ const App: React.FC = () => {
     >
       <HashRouter>
         <Routes>
-          <Route path="/" element={<AdminLayout />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="matrimony" element={<MatrimonyPage />} />
-            <Route path="jobs" element={<JobsPage />} />
-            <Route path="prayers" element={<PrayersPage />} />
-            <Route path="encouragements" element={<EncouragementsPage />} />
-            <Route path="events" element={<EventsPage />} />
-            <Route path="volunteers" element={<VolunteersPage />} />
-            <Route path="users" element={<UsersPage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Auth Routes */}
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
           </Route>
+
+          {/* Protected Admin Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<AdminLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="matrimony" element={<MatrimonyPage />} />
+              <Route path="jobs" element={<JobsPage />} />
+              <Route path="prayers" element={<PrayersPage />} />
+              <Route path="encouragements" element={<EncouragementsPage />} />
+              <Route path="events" element={<EventsPage />} />
+              <Route path="volunteers" element={<VolunteersPage />} />
+              <Route path="users" element={<UsersPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>
     </ConfigProvider>

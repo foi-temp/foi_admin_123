@@ -1,14 +1,27 @@
 import React from 'react';
-import { Bell, Search, LogOut, User } from 'lucide-react';
-import { Dropdown } from 'antd';
+import { Bell, Search, LogOut, User as UserIcon } from 'lucide-react';
+import { Dropdown, message } from 'antd';
 import type { MenuProps } from 'antd';
+import { useAdminStore } from '../../store/useAdminStore';
+import { useNavigate } from 'react-router-dom';
 
 export const AdminHeader: React.FC = () => {
+  const { user, logout } = useAdminStore();
+  const navigate = useNavigate();
+
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'logout') {
+      logout();
+      message.success('Logged out successfully');
+      navigate('/login');
+    }
+  };
+
   const items: MenuProps['items'] = [
     {
       key: 'profile',
       label: 'My Profile',
-      icon: <User size={16} />,
+      icon: <UserIcon size={16} />,
     },
     {
       key: 'logout',
@@ -37,14 +50,18 @@ export const AdminHeader: React.FC = () => {
 
         <div className="h-8 w-px bg-slate-200 mx-1"></div>
 
-        <Dropdown menu={{ items }} placement="bottomRight" arrow>
+        <Dropdown menu={{ items, onClick: handleMenuClick }} placement="bottomRight" arrow>
           <button className="flex items-center gap-3 hover:bg-slate-50 p-1 rounded-lg transition-all group">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-semibold text-slate-800 leading-tight">Admin User</p>
-              <p className="text-[11px] text-slate-500">Super Admin</p>
+              <p className="text-sm font-semibold text-slate-800 leading-tight">
+                {user?.full_name || 'Admin'}
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {user?.role?.replace('_', ' ') || 'Super Admin'}
+              </p>
             </div>
             <div className="w-9 h-9 bg-primary-light rounded-full flex items-center justify-center text-primary font-bold border border-primary/10 group-hover:border-primary/30">
-              AD
+              {user?.full_name?.charAt(0) || 'A'}
             </div>
           </button>
         </Dropdown>
