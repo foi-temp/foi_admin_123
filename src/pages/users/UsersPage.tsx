@@ -14,8 +14,7 @@ import { usersApi } from '../../api/users';
 import type { AppUser } from '../../api/users';
 
 const DENOMINATIONS = [
-  'Neutral', 'Catholic', 'Orthodox', 'Evangelical', 'Charismatic', 'Reformed',
-  'Pentecostal', 'Protestant', 'Born Again'
+  'Neutral', 'Catholic', 'Orthodox', 'Evangelical', 'Charismatic', 'Reformed'
 ].map(d => ({ label: d, value: d }));
 
 const ACTIVE_OPTIONS = [

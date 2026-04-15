@@ -10,13 +10,13 @@ import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { MatrimonyPage } from './pages/matrimony/MatrimonyPage';
 import { JobsPage } from './pages/jobs/JobsPage';
 import { PrayersPage } from './pages/prayers/PrayersPage';
-import { EncouragementsPage } from './pages/encouragements/EncouragementsPage';
 import { EventsPage } from './pages/events/EventsPage';
 import { VolunteersPage } from './pages/volunteers/VolunteersPage';
 import { UsersPage } from './pages/users/UsersPage';
 import { ReportsPage } from './pages/reports/ReportsPage';
 import { AnalyticsPage } from './pages/analytics/AnalyticsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
+import { AnnouncementsPage } from './pages/announcements/AnnouncementsPage';
 
 // Auth Pages
 import { LoginPage } from './pages/auth/LoginPage';
@@ -62,12 +62,12 @@ const App: React.FC = () => {
               <Route path="matrimony" element={<MatrimonyPage />} />
               <Route path="jobs" element={<JobsPage />} />
               <Route path="prayers" element={<PrayersPage />} />
-              <Route path="encouragements" element={<EncouragementsPage />} />
               <Route path="events" element={<EventsPage />} />
               <Route path="volunteers" element={<VolunteersPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>

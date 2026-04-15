@@ -14,8 +14,7 @@ import { matrimonyApi } from '../../api/matrimony';
 import type { MatrimonyProfile } from '../../api/matrimony';
 
 const DENOMINATIONS = [
-  'Neutral', 'Catholic', 'Orthodox', 'Evangelical', 'Charismatic', 'Reformed',
-  'Pentecostal', 'Protestant', 'Born Again'
+  'Neutral', 'Catholic', 'Orthodox', 'Evangelical', 'Charismatic', 'Reformed'
 ].map(d => ({ label: d, value: d }));
 
 const STATUS_OPTIONS = [

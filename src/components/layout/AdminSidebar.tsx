@@ -5,7 +5,6 @@ import {
   Heart, 
   Briefcase, 
   MessageCircle, 
-  Highlighter, 
   Calendar, 
   Users, 
   ShieldAlert, 
@@ -13,7 +12,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  UserCheck
+  UserCheck,
+  Megaphone
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -22,7 +22,7 @@ const menuItems = [
   { path: '/matrimony', label: 'Matrimony', icon: Heart },
   { path: '/jobs', label: 'Jobs', icon: Briefcase },
   { path: '/prayers', label: 'Prayer Requests', icon: MessageCircle },
-  { path: '/encouragements', label: 'Encouragements', icon: Highlighter },
+  { path: '/announcements', label: 'Announcements', icon: Megaphone },
   { path: '/events', label: 'Events', icon: Calendar },
   { path: '/volunteers', label: 'Volunteers', icon: UserCheck },
   { path: '/users', label: 'Users', icon: Users },

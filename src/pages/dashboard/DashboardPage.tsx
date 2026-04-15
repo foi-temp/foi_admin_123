@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/common/Card';
 import { 
@@ -6,20 +6,95 @@ import {
   MessageCircle, 
   Briefcase, 
   Heart,
-  TrendingUp,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Loader2
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
-
-const stats = [
-  { label: 'Total Users', value: '12,482', icon: Users, change: '+12%', positive: true, color: 'bg-blue-500' },
-  { label: 'Prayer Requests', value: '856', icon: MessageCircle, change: '+5%', positive: true, color: 'bg-emerald-500' },
-  { label: 'Job Postings', value: '124', icon: Briefcase, change: '-2%', positive: false, color: 'bg-amber-500' },
-  { label: 'Matrimony Profiles', value: '3,150', icon: Heart, change: '+18%', positive: true, color: 'bg-rose-500' },
-];
+import { dashboardApi } from '../../api/dashboard';
+import type { DashboardResponse } from '../../api/dashboard';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Legend
+} from 'recharts';
+import dayjs from 'dayjs';
 
 export const DashboardPage: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardResponse | null>(null);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const response = await dashboardApi.getDashboardData();
+        if (response.status) {
+          setData(response as unknown as DashboardResponse);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="animate-spin text-primary" size={48} />
+        <p className="text-slate-500 font-medium">Loading real-time insights...</p>
+      </div>
+    );
+  }
+
+  const stats = [
+    { 
+      label: 'Total Users', 
+      value: data?.users.total.toLocaleString() || '0', 
+      icon: Users, 
+      change: `${data?.users.growth}%`, 
+      positive: (data?.users.growth || 0) >= 0, 
+      color: 'bg-blue-500' 
+    },
+    { 
+      label: 'Prayer Requests', 
+      value: data?.prayers.total.toLocaleString() || '0', 
+      icon: MessageCircle, 
+      change: `${data?.prayers.growth}%`, 
+      positive: (data?.prayers.growth || 0) >= 0, 
+      color: 'bg-emerald-500' 
+    },
+    { 
+      label: 'Job Postings', 
+      value: data?.jobs.total.toLocaleString() || '0', 
+      icon: Briefcase, 
+      change: `${data?.jobs.growth}%`, 
+      positive: (data?.jobs.growth || 0) >= 0, 
+      color: 'bg-amber-500' 
+    },
+    { 
+      label: 'Matrimony Profiles', 
+      value: data?.matrimony.total.toLocaleString() || '0', 
+      icon: Heart, 
+      change: `${data?.matrimony.growth}%`, 
+      positive: (data?.matrimony.growth || 0) >= 0, 
+      color: 'bg-rose-500' 
+    },
+  ];
+
+  const chartData = data?.activity_analytics.map(item => ({
+    ...item,
+    formattedDate: dayjs(item.date).format('MMM DD')
+  })) || [];
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -48,34 +123,96 @@ export const DashboardPage: React.FC = () => {
                 {stat.positive ? <ArrowUpRight size={14} className="mr-0.5" /> : <ArrowDownRight size={14} className="mr-0.5" />}
                 {stat.change}
               </span>
-              <span className="text-slate-400 text-xs text-nowrap">vs last month</span>
+              <span className="text-slate-400 text-xs text-nowrap">vs last period</span>
             </div>
           </Card>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card title="Activity Analytics" className="lg:col-span-2">
-          <div className="h-[300px] flex items-center justify-center bg-slate-50 rounded-lg border border-dashed border-slate-200">
-            <div className="text-center">
-              <TrendingUp size={48} className="text-slate-300 mx-auto mb-2" />
-              <p className="text-slate-400 font-medium italic">Chart visualization would go here</p>
-              <p className="text-slate-300 text-xs">Using Chart.js or Recharts</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card title="Recent Notifications">
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((_, i) => (
-              <div key={i} className="flex gap-3 pb-3 border-b border-slate-50 last:border-0 last:pb-0">
-                <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-slate-800 leading-snug">New matrimony profile awaiting approval</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">2 hours ago</p>
-                </div>
-              </div>
-            ))}
+      <div className="grid grid-cols-1 gap-6">
+        <Card title="Activity Analytics" className="border-none ring-1 ring-slate-100 shadow-sm overflow-hidden">
+          <div className="h-[400px] w-full mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorPrayers" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorJobs" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorMatrimony" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="formattedDate" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  dx={-10}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    borderRadius: '12px', 
+                    border: 'none', 
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                    padding: '12px'
+                  }}
+                />
+                <Legend iconType="circle" />
+                <Area 
+                  type="monotone" 
+                  dataKey="users" 
+                  name="Users"
+                  stroke="#3b82f6" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorUsers)" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="prayers" 
+                  name="Prayers"
+                  stroke="#10b981" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorPrayers)" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="jobs" 
+                  name="Jobs"
+                  stroke="#f59e0b" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorJobs)" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="matrimony" 
+                  name="Matrimony"
+                  stroke="#f43f5e" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorMatrimony)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </Card>
       </div>
