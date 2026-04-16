@@ -65,4 +65,7 @@ export const usersApi = {
 
   revokeUser: (userId: string, isActive: boolean) =>
     apiClient.patch<{ [key: string]: any }>(`/users/admin/${userId}/revoke?is_active=${isActive}`),
+  deleteUser: (userId: string) => {
+    return apiClient.delete(`/users/admin/${userId}`);
+  },
 };

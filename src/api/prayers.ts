@@ -47,4 +47,7 @@ export const prayersApi = {
     if (filters.date_to) params.set('date_to', filters.date_to);
     return apiClient.get<PrayerListResponse>(`/prayers/admin/all?${params.toString()}`);
   },
+  deletePrayer: (prayerId: string) => {
+    return apiClient.delete(`/prayers/admin/${prayerId}`);
+  },
 };

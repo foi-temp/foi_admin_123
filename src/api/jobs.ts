@@ -60,4 +60,7 @@ export const jobsApi = {
       job_id: jobId,
       status,
     }),
+  deleteJob: (jobId: string) => {
+    return apiClient.delete(`/jobs/admin/${jobId}`);
+  },
 };

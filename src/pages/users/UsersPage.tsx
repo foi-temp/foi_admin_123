@@ -7,7 +7,7 @@ import {
 } from 'antd';
 import {
   Search, Filter, Phone, Users, ShieldOff, ShieldCheck,
-  Calendar, BookOpen, Heart, CheckCircle, XCircle, MapPin, Clock
+  Calendar, BookOpen, Heart, CheckCircle, XCircle, MapPin, Clock, Download
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { usersApi } from '../../api/users';
@@ -117,6 +117,39 @@ export const UsersPage: React.FC = () => {
     } catch (err) {
       // handled by interceptor
     }
+  };
+
+  const handleExport = () => {
+    if (data.length === 0) {
+      message.warning('No data to export');
+      return;
+    }
+
+    const headers = ['Full Name', 'Phone', 'Denomination', 'Profile Status', 'Active', 'Joined Date'];
+    const csvData = data.map(u => [
+      u.full_name,
+      u.phone_number,
+      u.denomination,
+      u.is_profile_setup_complete ? 'Complete' : 'Incomplete',
+      u.is_active ? 'Yes' : 'No',
+      dayjs(u.created_at).format('YYYY-MM-DD HH:mm')
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(cell => `"${cell || ''}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `users_export_${dayjs().format('YYYYMMDD')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    message.success('Users list exported successfully');
   };
 
   const hasFilters = search || filterActive !== undefined || filterDenomination || filterProfileComplete !== undefined || filterDateFrom || filterDateTo;
@@ -248,14 +281,23 @@ export const UsersPage: React.FC = () => {
         title="User Management"
         subtitle="Manage all registered users and control account access."
         extra={
-          revokedCount > 0 ? (
-            <Badge count={revokedCount} color="#ef4444">
-              <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 rounded-xl text-rose-700 text-sm font-semibold border border-rose-200">
-                <ShieldOff size={16} />
-                <span>{revokedCount} Revoked</span>
-              </div>
-            </Badge>
-          ) : null
+          <div className="flex items-center gap-3">
+            <Button 
+              icon={<Download size={16} />} 
+              onClick={handleExport}
+              className="rounded-xl border-slate-200 text-slate-600 font-semibold hover:text-primary hover:border-primary/30 flex items-center gap-2 h-10 px-4"
+            >
+              Export CSV
+            </Button>
+            {revokedCount > 0 && (
+              <Badge count={revokedCount} color="#ef4444">
+                <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 rounded-xl text-rose-700 text-sm font-semibold border border-rose-200 h-10">
+                  <ShieldOff size={16} />
+                  <span className="hidden sm:inline">{revokedCount} Revoked</span>
+                </div>
+              </Badge>
+            )}
+          </div>
         }
       />
 

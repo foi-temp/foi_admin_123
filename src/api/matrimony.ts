@@ -123,4 +123,7 @@ export const matrimonyApi = {
       profile_id: profileId,
       status,
     }),
+  deleteProfile: (id: string) => {
+    return apiClient.delete(`/matrimony/admin/profile/${id}`);
+  },
 };
